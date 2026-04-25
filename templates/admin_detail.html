@@ -10,54 +10,302 @@ body { font-family: "Microsoft JhengHei", Arial, sans-serif; background: #f4f6fb
 .topbar { background: #1e2d40; color: #fff; padding: 14px 32px; display: flex; align-items: center; gap: 16px; }
 .topbar a { color: #a8bfd0; text-decoration: none; font-size: 0.88rem; }
 .topbar a:hover { color: #fff; }
-.topbar h1 { font-size: 1rem; color: #fff; }
-.container { max-width: 800px; margin: 32px auto; padding: 0 20px 60px; }
-.meta-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 20px 24px; margin-bottom: 20px; display: flex; gap: 32px; flex-wrap: wrap; }
-.meta-item .label { font-size: 0.78rem; color: #7f8fa4; }
-.meta-item .value { font-size: 1rem; font-weight: bold; color: #1e2d40; margin-top: 2px; }
-.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: bold; }
+.topbar h1 { font-size: 1rem; }
+.topbar-right { margin-left: auto; }
+.btn { padding: 7px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; font-weight: bold; }
+.btn-blue { background: #4a90e2; color: #fff; }
+.btn-blue:hover { background: #357abd; }
+.container { max-width: 860px; margin: 28px auto; padding: 0 20px 60px; }
+.meta-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 20px 24px; margin-bottom: 24px; display: flex; gap: 32px; flex-wrap: wrap; }
+.meta-item .label { font-size: 0.75rem; color: #7f8fa4; }
+.meta-item .value { font-size: 0.95rem; font-weight: bold; color: #1e2d40; margin-top: 2px; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
 .badge-done { background: #d5f5e3; color: #1e8449; }
 .badge-wip { background: #fdebd0; color: #e67e22; }
-.section { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; }
-.section-title { background: #1e2d40; color: #fff; padding: 10px 18px; font-size: 0.9rem; font-weight: bold; }
-.json-block { padding: 16px 18px; font-family: monospace; font-size: 0.82rem; white-space: pre-wrap; word-break: break-all; background: #fafbfc; color: #2c3e50; max-height: 500px; overflow-y: auto; line-height: 1.6; }
-.btn-copy { margin: 0 18px 16px; padding: 7px 18px; background: #4a90e2; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: bold; }
-.btn-copy:hover { background: #357abd; }
+
+/* Part sections */
+.part-block { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 20px; overflow: hidden; }
+.part-title { background: #1e2d40; color: #fff; padding: 11px 20px; font-size: 0.95rem; font-weight: bold; }
+.part-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+/* Item cards */
+.item-block { border: 1px solid #e8edf3; border-radius: 8px; overflow: hidden; margin-bottom: 4px; }
+.item-title { background: #f0f4fa; padding: 8px 14px; font-weight: bold; font-size: 0.88rem; color: #2c3e50; border-bottom: 1px solid #e8edf3; }
+.item-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Fields */
+.field-row { display: flex; flex-direction: column; gap: 3px; }
+.field-q { font-size: 0.82rem; color: #7f8fa4; font-weight: bold; }
+.field-a { font-size: 0.92rem; color: #2c3e50; white-space: pre-wrap; line-height: 1.6; }
+.field-a.empty { color: #ccc; font-style: italic; }
+
+/* IO block */
+.io-wrap { background: #f8fafc; border: 1px solid #e4ecf5; border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.io-label { font-size: 0.75rem; font-weight: bold; color: #4a90e2; text-transform: uppercase; letter-spacing: 0.05em; }
+.step-list { display: flex; flex-direction: column; gap: 4px; padding-left: 4px; }
+.step-item { font-size: 0.9rem; color: #2c3e50; }
+
+/* Tags (checkboxes/radio) */
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { background: #eef4fd; border: 1px solid #c8dcf5; color: #2c5f9e; padding: 3px 12px; border-radius: 20px; font-size: 0.82rem; }
+
+/* JSON section */
+.json-toggle { padding: 10px 20px; background: #f4f6fb; border-top: 1px solid #e8edf3; font-size: 0.82rem; color: #4a90e2; cursor: pointer; user-select: none; }
+.json-toggle:hover { background: #eef4fd; }
+.json-block { padding: 14px 20px; font-family: monospace; font-size: 0.78rem; white-space: pre-wrap; word-break: break-all; background: #fafbfc; color: #555; max-height: 400px; overflow-y: auto; display: none; }
 </style>
 </head>
 <body>
 <div class="topbar">
   <a href="/admin/list">← 返回列表</a>
-  <h1>填寫詳情 #{{ row.id }}</h1>
+  <h1>{{ d.get('p0_name', '未填姓名') }} · 填寫詳情</h1>
+  <div class="topbar-right">
+    <button class="btn btn-blue" onclick="copyJson()">複製 JSON（給 AI 分析）</button>
+  </div>
 </div>
+
 <div class="container">
+  <!-- 基本資料 -->
   <div class="meta-card">
     <div class="meta-item"><div class="label">手機號碼</div><div class="value">{{ row.phone }}</div></div>
-    <div class="meta-item"><div class="label">姓名</div><div class="value">{{ row.data.get('p0_name', '-') }}</div></div>
-    <div class="meta-item"><div class="label">部門</div><div class="value">{{ row.data.get('p0_dept', '-') }}</div></div>
-    <div class="meta-item"><div class="label">職稱</div><div class="value">{{ row.data.get('p0_title', '-') }}</div></div>
+    <div class="meta-item"><div class="label">姓名</div><div class="value">{{ d.get('p0_name') or '-' }}</div></div>
+    <div class="meta-item"><div class="label">部門</div><div class="value">{{ d.get('p0_dept') or '-' }}</div></div>
+    <div class="meta-item"><div class="label">職稱</div><div class="value">{{ d.get('p0_title') or '-' }}</div></div>
     <div class="meta-item">
       <div class="label">狀態</div>
-      <div class="value">
-        <span class="badge {% if row.completed %}badge-done{% else %}badge-wip{% endif %}">
-          {% if row.completed %}已完成{% else %}填寫中{% endif %}
-        </span>
-      </div>
+      <div class="value"><span class="badge {% if row.completed %}badge-done{% else %}badge-wip{% endif %}">{% if row.completed %}已完成{% else %}填寫中{% endif %}</span></div>
     </div>
     <div class="meta-item"><div class="label">最後更新</div><div class="value">{{ row.updated_at.strftime('%Y-%m-%d %H:%M') if row.updated_at else '-' }}</div></div>
   </div>
 
-  <div class="section">
-    <div class="section-title">完整資料（JSON，可貼給 AI 分析）</div>
+  <!-- 每日工作 -->
+  {% set daily_items = [] %}
+  {% for i in range(1, 20) %}
+    {% if d.get('p1_' ~ i ~ '_name') %}{% set _ = daily_items.append(i) %}{% endif %}
+  {% endfor %}
+  {% if daily_items %}
+  <div class="part-block">
+    <div class="part-title">Part 1 · 每日固定工作</div>
+    <div class="part-body">
+      {% for i in daily_items %}
+      <div class="item-block">
+        <div class="item-title">每日工作 #{{ i }}：{{ d.get('p1_' ~ i ~ '_name', '') }}</div>
+        <div class="item-body">
+          {% macro frow(q, a) %}
+          <div class="field-row"><div class="field-q">{{ q }}</div><div class="field-a {% if not a %}empty{% endif %}">{{ a or '（未填）' }}</div></div>
+          {% endmacro %}
+          {{ frow('目的', d.get('p1_' ~ i ~ '_purpose')) }}
+          <div class="field-row">
+            <div class="field-q">怎麼做</div>
+            <div class="io-wrap">
+              <div><div class="io-label">輸入</div><div class="field-a {% if not d.get('p1_' ~ i ~ '_input') %}empty{% endif %}">{{ d.get('p1_' ~ i ~ '_input') or '（未填）' }}</div></div>
+              <div>
+                <div class="io-label">處理步驟</div>
+                <div class="step-list">
+                  {% for s in range(1, 20) %}
+                    {% set sv = d.get('p1_' ~ i ~ '_step_' ~ s) %}
+                    {% if sv %}<div class="step-item">{{ s }}. {{ sv }}</div>{% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+              <div><div class="io-label">輸出</div><div class="field-a {% if not d.get('p1_' ~ i ~ '_output') %}empty{% endif %}">{{ d.get('p1_' ~ i ~ '_output') or '（未填）' }}</div></div>
+            </div>
+          </div>
+          {{ frow('工具', d.get('p1_' ~ i ~ '_tools')) }}
+          {{ frow('例外狀況', d.get('p1_' ~ i ~ '_exception')) }}
+          {{ frow('需要動腦判斷', d.get('p1_' ~ i ~ '_think')) }}
+          {{ frow('SOP 文件', d.get('p1_' ~ i ~ '_sop')) }}
+          {{ frow('影響程度', d.get('p1_' ~ i ~ '_impact')) }}
+          {% set auto_val = d.get('p1_' ~ i ~ '_auto') %}
+          {% if auto_val %}
+          <div class="field-row"><div class="field-q">可以自動化嗎</div>
+            <div class="tag-list">{% for v in (auto_val if auto_val is iterable and auto_val is not string else [auto_val]) %}<span class="tag">{{ v }}</span>{% endfor %}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 每週工作 -->
+  {% set weekly_items = [] %}
+  {% for i in range(1, 20) %}
+    {% if d.get('p2_' ~ i ~ '_name') %}{% set _ = weekly_items.append(i) %}{% endif %}
+  {% endfor %}
+  {% if weekly_items %}
+  <div class="part-block">
+    <div class="part-title">Part 2 · 每週固定工作</div>
+    <div class="part-body">
+      {% for i in weekly_items %}
+      <div class="item-block">
+        <div class="item-title">每週工作 #{{ i }}：{{ d.get('p2_' ~ i ~ '_name', '') }}</div>
+        <div class="item-body">
+          {% macro frow2(q, a) %}<div class="field-row"><div class="field-q">{{ q }}</div><div class="field-a {% if not a %}empty{% endif %}">{{ a or '（未填）' }}</div></div>{% endmacro %}
+          {{ frow2('頻率', d.get('p2_' ~ i ~ '_freq')) }}
+          {{ frow2('目的', d.get('p2_' ~ i ~ '_purpose')) }}
+          <div class="field-row"><div class="field-q">怎麼做</div>
+            <div class="io-wrap">
+              <div><div class="io-label">輸入</div><div class="field-a">{{ d.get('p2_' ~ i ~ '_input') or '（未填）' }}</div></div>
+              <div><div class="io-label">處理步驟</div><div class="step-list">{% for s in range(1,20) %}{% set sv=d.get('p2_'~i~'_step_'~s) %}{% if sv %}<div class="step-item">{{ s }}. {{ sv }}</div>{% endif %}{% endfor %}</div></div>
+              <div><div class="io-label">輸出</div><div class="field-a">{{ d.get('p2_' ~ i ~ '_output') or '（未填）' }}</div></div>
+            </div>
+          </div>
+          {{ frow2('工具', d.get('p2_' ~ i ~ '_tools')) }}
+          {{ frow2('例外狀況', d.get('p2_' ~ i ~ '_exception')) }}
+          {{ frow2('需要動腦判斷', d.get('p2_' ~ i ~ '_think')) }}
+          {{ frow2('SOP 文件', d.get('p2_' ~ i ~ '_sop')) }}
+          {{ frow2('影響程度', d.get('p2_' ~ i ~ '_impact')) }}
+          {% set av=d.get('p2_'~i~'_auto') %}{% if av %}<div class="field-row"><div class="field-q">可以自動化嗎</div><div class="tag-list">{% for v in (av if av is iterable and av is not string else [av]) %}<span class="tag">{{ v }}</span>{% endfor %}</div></div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 月/季工作 -->
+  {% set monthly_items = [] %}
+  {% for i in range(1, 20) %}
+    {% if d.get('p3_' ~ i ~ '_name') %}{% set _ = monthly_items.append(i) %}{% endif %}
+  {% endfor %}
+  {% if monthly_items %}
+  <div class="part-block">
+    <div class="part-title">Part 3 · 每月／週期性工作</div>
+    <div class="part-body">
+      {% for i in monthly_items %}
+      <div class="item-block">
+        <div class="item-title">月季工作 #{{ i }}：{{ d.get('p3_' ~ i ~ '_name', '') }}</div>
+        <div class="item-body">
+          {% macro frow3(q, a) %}<div class="field-row"><div class="field-q">{{ q }}</div><div class="field-a {% if not a %}empty{% endif %}">{{ a or '（未填）' }}</div></div>{% endmacro %}
+          {{ frow3('頻率', d.get('p3_' ~ i ~ '_freq')) }}
+          {{ frow3('目的', d.get('p3_' ~ i ~ '_purpose')) }}
+          <div class="field-row"><div class="field-q">怎麼做</div>
+            <div class="io-wrap">
+              <div><div class="io-label">輸入</div><div class="field-a">{{ d.get('p3_'~i~'_input') or '（未填）' }}</div></div>
+              <div><div class="io-label">處理步驟</div><div class="step-list">{% for s in range(1,20) %}{% set sv=d.get('p3_'~i~'_step_'~s) %}{% if sv %}<div class="step-item">{{ s }}. {{ sv }}</div>{% endif %}{% endfor %}</div></div>
+              <div><div class="io-label">輸出</div><div class="field-a">{{ d.get('p3_'~i~'_output') or '（未填）' }}</div></div>
+            </div>
+          </div>
+          {{ frow3('工具', d.get('p3_' ~ i ~ '_tools')) }}
+          {{ frow3('例外狀況', d.get('p3_' ~ i ~ '_exception')) }}
+          {{ frow3('需要動腦判斷', d.get('p3_' ~ i ~ '_think')) }}
+          {{ frow3('SOP 文件', d.get('p3_' ~ i ~ '_sop')) }}
+          {{ frow3('影響程度', d.get('p3_' ~ i ~ '_impact')) }}
+          {% set av=d.get('p3_'~i~'_auto') %}{% if av %}<div class="field-row"><div class="field-q">可以自動化嗎</div><div class="tag-list">{% for v in (av if av is iterable and av is not string else [av]) %}<span class="tag">{{ v }}</span>{% endfor %}</div></div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 任務型工作 -->
+  {% set task_items = [] %}
+  {% for i in range(1, 20) %}
+    {% if d.get('p4_' ~ i ~ '_name') %}{% set _ = task_items.append(i) %}{% endif %}
+  {% endfor %}
+  {% if task_items %}
+  <div class="part-block">
+    <div class="part-title">Part 4 · 任務型工作</div>
+    <div class="part-body">
+      {% for i in task_items %}
+      <div class="item-block">
+        <div class="item-title">任務型工作 #{{ i }}：{{ d.get('p4_' ~ i ~ '_name', '') }}</div>
+        <div class="item-body">
+          {% macro frow4(q, a) %}<div class="field-row"><div class="field-q">{{ q }}</div><div class="field-a {% if not a %}empty{% endif %}">{{ a or '（未填）' }}</div></div>{% endmacro %}
+          {{ frow4('觸發條件', d.get('p4_' ~ i ~ '_trigger')) }}
+          {{ frow4('發生頻率', d.get('p4_' ~ i ~ '_freq')) }}
+          {{ frow4('目的', d.get('p4_' ~ i ~ '_purpose')) }}
+          <div class="field-row"><div class="field-q">怎麼做</div>
+            <div class="io-wrap">
+              <div><div class="io-label">輸入</div><div class="field-a">{{ d.get('p4_'~i~'_input') or '（未填）' }}</div></div>
+              <div><div class="io-label">處理步驟</div><div class="step-list">{% for s in range(1,20) %}{% set sv=d.get('p4_'~i~'_step_'~s) %}{% if sv %}<div class="step-item">{{ s }}. {{ sv }}</div>{% endif %}{% endfor %}</div></div>
+              <div><div class="io-label">輸出</div><div class="field-a">{{ d.get('p4_'~i~'_output') or '（未填）' }}</div></div>
+            </div>
+          </div>
+          {{ frow4('工具', d.get('p4_' ~ i ~ '_tools')) }}
+          {{ frow4('例外狀況', d.get('p4_' ~ i ~ '_exception')) }}
+          {{ frow4('需要動腦判斷', d.get('p4_' ~ i ~ '_think')) }}
+          {{ frow4('等待回覆', d.get('p4_' ~ i ~ '_wait')) }}
+          {{ frow4('SOP 文件', d.get('p4_' ~ i ~ '_sop')) }}
+          {{ frow4('影響程度', d.get('p4_' ~ i ~ '_impact')) }}
+          {% set av=d.get('p4_'~i~'_auto') %}{% if av %}<div class="field-row"><div class="field-q">可以自動化嗎</div><div class="tag-list">{% for v in (av if av is iterable and av is not string else [av]) %}<span class="tag">{{ v }}</span>{% endfor %}</div></div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 突發工作 -->
+  {% set urgent_items = [] %}
+  {% for i in range(1, 20) %}
+    {% if d.get('p5_' ~ i ~ '_name') %}{% set _ = urgent_items.append(i) %}{% endif %}
+  {% endfor %}
+  {% if urgent_items %}
+  <div class="part-block">
+    <div class="part-title">Part 5 · 突發工作</div>
+    <div class="part-body">
+      {% for i in urgent_items %}
+      <div class="item-block">
+        <div class="item-title">突發工作 #{{ i }}：{{ d.get('p5_' ~ i ~ '_name', '') }}</div>
+        <div class="item-body">
+          {% macro frow5(q, a) %}<div class="field-row"><div class="field-q">{{ q }}</div><div class="field-a {% if not a %}empty{% endif %}">{{ a or '（未填）' }}</div></div>{% endmacro %}
+          {{ frow5('發生頻率', d.get('p5_' ~ i ~ '_freq')) }}
+          {{ frow5('打斷什麼事', d.get('p5_' ~ i ~ '_interrupt')) }}
+          <div class="field-row"><div class="field-q">怎麼處理</div>
+            <div class="io-wrap">
+              <div><div class="io-label">輸入</div><div class="field-a">{{ d.get('p5_'~i~'_input') or '（未填）' }}</div></div>
+              <div><div class="io-label">處理步驟</div><div class="step-list">{% for s in range(1,20) %}{% set sv=d.get('p5_'~i~'_step_'~s) %}{% if sv %}<div class="step-item">{{ s }}. {{ sv }}</div>{% endif %}{% endfor %}</div></div>
+              <div><div class="io-label">輸出</div><div class="field-a">{{ d.get('p5_'~i~'_output') or '（未填）' }}</div></div>
+            </div>
+          </div>
+          {{ frow5('工具', d.get('p5_' ~ i ~ '_tools')) }}
+          {{ frow5('例外狀況', d.get('p5_' ~ i ~ '_exception')) }}
+          {{ frow5('需要動腦判斷', d.get('p5_' ~ i ~ '_think')) }}
+          {% set rv=d.get('p5_'~i~'_root') %}{% if rv %}<div class="field-row"><div class="field-q">根本原因</div><div class="tag-list">{% for v in (rv if rv is iterable and rv is not string else [rv]) %}<span class="tag">{{ v }}</span>{% endfor %}</div></div>{% endif %}
+          {{ frow5('其他原因', d.get('p5_' ~ i ~ '_root_other')) }}
+          {% set av=d.get('p5_'~i~'_auto') %}{% if av %}<div class="field-row"><div class="field-q">可以自動化嗎</div><div class="tag-list">{% for v in (av if av is iterable and av is not string else [av]) %}<span class="tag">{{ v }}</span>{% endfor %}</div></div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- 痛點與自動化 -->
+  <div class="part-block">
+    <div class="part-title">Part 6 · 痛點盤點與自動化想像</div>
+    <div class="part-body">
+      {% macro frow6(q, a) %}<div class="field-row"><div class="field-q">{{ q }}</div><div class="field-a {% if not a %}empty{% endif %}">{{ a or '（未填）' }}</div></div>{% endmacro %}
+      {{ frow6('最常打斷你的事', d.get('p8_interrupt')) }}
+      {{ frow6('出錯率最高的工作', d.get('p8_error')) }}
+      {{ frow6('最想交給 AI 的三件事', d.get('p9_delegate')) }}
+      {{ frow6('電腦可自動但仍人工的事', d.get('p9_automate')) }}
+      {{ frow6('重複性勞動比例', d.get('p10_auto_pct')) }}
+    </div>
+  </div>
+
+  <!-- JSON (隱藏) -->
+  <div class="part-block">
+    <div class="json-toggle" onclick="toggleJson(this)">▶ 顯示原始 JSON（給 AI 分析用）</div>
     <div class="json-block" id="jsonBlock">{{ data_json }}</div>
-    <button class="btn-copy" onclick="copyJson()">複製 JSON</button>
   </div>
 </div>
+
 <script>
+function toggleJson(el) {
+  const block = document.getElementById('jsonBlock');
+  const show = block.style.display === 'block';
+  block.style.display = show ? 'none' : 'block';
+  el.textContent = (show ? '▶' : '▼') + ' ' + (show ? '顯示' : '隱藏') + '原始 JSON（給 AI 分析用）';
+}
 function copyJson() {
   const text = document.getElementById('jsonBlock').textContent;
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.btn-copy');
+    const btn = document.querySelector('.btn-blue');
     const orig = btn.textContent;
     btn.textContent = '已複製！';
     setTimeout(() => btn.textContent = orig, 1500);

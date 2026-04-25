@@ -159,7 +159,7 @@ def admin_view(sub_id):
     if not row:
         return '找不到資料', 404
     data_json = json.dumps(row['data'], ensure_ascii=False, indent=2)
-    return render_template('admin_detail.html', row=row, data_json=data_json)
+    return render_template('admin_detail.html', row=row, d=row['data'] or {}, data_json=data_json)
 
 @app.route('/admin/export/json')
 def export_json():
