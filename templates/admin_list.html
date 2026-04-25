@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理後台 - 填寫紀錄</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft JhengHei", Arial, sans-serif; background: #f4f6fb; color: #2c3e50; font-size: 15px; }
+.topbar { background: #1e2d40; color: #fff; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { font-size: 1.1rem; }
+.topbar-right { display: flex; gap: 10px; align-items: center; }
+.btn { padding: 7px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.88rem; font-family: inherit; font-weight: bold; text-decoration: none; display: inline-block; }
+.btn-green { background: #27ae60; color: #fff; }
+.btn-green:hover { background: #1e8449; }
+.btn-purple { background: #8e44ad; color: #fff; }
+.btn-purple:hover { background: #7d3c98; }
+.btn-gray { background: #95a5a6; color: #fff; }
+.btn-gray:hover { background: #7f8c8d; }
+.container { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
+.stats { display: flex; gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 8px; padding: 16px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); flex: 1; }
+.stat-card .num { font-size: 2rem; font-weight: bold; color: #1e2d40; }
+.stat-card .label { font-size: 0.82rem; color: #7f8fa4; margin-top: 2px; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+thead { background: #1e2d40; color: #fff; }
+th { padding: 12px 16px; text-align: left; font-size: 0.85rem; font-weight: bold; }
+td { padding: 12px 16px; border-bottom: 1px solid #f0f2f5; font-size: 0.88rem; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f7faff; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: bold; }
+.badge-done { background: #d5f5e3; color: #1e8449; }
+.badge-wip { background: #fdebd0; color: #e67e22; }
+a.view-link { color: #4a90e2; text-decoration: none; font-weight: bold; }
+a.view-link:hover { text-decoration: underline; }
+.no-data { text-align: center; padding: 60px; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>工作流程分析 · 管理後台</h1>
+  <div class="topbar-right">
+    <a href="/admin/export/json" class="btn btn-purple">匯出 JSON</a>
+    <a href="/admin/export/csv" class="btn btn-green">匯出 CSV</a>
+    <a href="/admin/logout" class="btn btn-gray">登出</a>
+  </div>
+</div>
+<div class="container">
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num">{{ rows|length }}</div>
+      <div class="label">總填寫人數</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ rows|selectattr('completed')|list|length }}</div>
+      <div class="label">已完成</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">{{ rows|rejectattr('completed')|list|length }}</div>
+      <div class="label">填寫中</div>
+    </div>
+  </div>
+
+  {% if rows %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>手機號碼</th>
+        <th>姓名</th>
+        <th>部門</th>
+        <th>職稱</th>
+        <th>狀態</th>
+        <th>最後更新</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.id }}</td>
+        <td>{{ row.phone }}</td>
+        <td>{{ row.name or '-' }}</td>
+        <td>{{ row.dept or '-' }}</td>
+        <td>{{ row.title or '-' }}</td>
+        <td><span class="badge {% if row.completed %}badge-done{% else %}badge-wip{% endif %}">
+          {% if row.completed %}已完成{% else %}填寫中{% endif %}
+        </span></td>
+        <td>{{ row.updated_at.strftime('%Y-%m-%d %H:%M') if row.updated_at else '-' }}</td>
+        <td><a href="/admin/view/{{ row.id }}" class="view-link">查看</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="no-data">目前還沒有填寫紀錄</div>
+  {% endif %}
+</div>
+</body>
+</html>

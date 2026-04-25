@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>填寫詳情</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft JhengHei", Arial, sans-serif; background: #f4f6fb; color: #2c3e50; font-size: 15px; }
+.topbar { background: #1e2d40; color: #fff; padding: 14px 32px; display: flex; align-items: center; gap: 16px; }
+.topbar a { color: #a8bfd0; text-decoration: none; font-size: 0.88rem; }
+.topbar a:hover { color: #fff; }
+.topbar h1 { font-size: 1rem; color: #fff; }
+.container { max-width: 800px; margin: 32px auto; padding: 0 20px 60px; }
+.meta-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 20px 24px; margin-bottom: 20px; display: flex; gap: 32px; flex-wrap: wrap; }
+.meta-item .label { font-size: 0.78rem; color: #7f8fa4; }
+.meta-item .value { font-size: 1rem; font-weight: bold; color: #1e2d40; margin-top: 2px; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: bold; }
+.badge-done { background: #d5f5e3; color: #1e8449; }
+.badge-wip { background: #fdebd0; color: #e67e22; }
+.section { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 16px; overflow: hidden; }
+.section-title { background: #1e2d40; color: #fff; padding: 10px 18px; font-size: 0.9rem; font-weight: bold; }
+.json-block { padding: 16px 18px; font-family: monospace; font-size: 0.82rem; white-space: pre-wrap; word-break: break-all; background: #fafbfc; color: #2c3e50; max-height: 500px; overflow-y: auto; line-height: 1.6; }
+.btn-copy { margin: 0 18px 16px; padding: 7px 18px; background: #4a90e2; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: bold; }
+.btn-copy:hover { background: #357abd; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="/admin/list">← 返回列表</a>
+  <h1>填寫詳情 #{{ row.id }}</h1>
+</div>
+<div class="container">
+  <div class="meta-card">
+    <div class="meta-item"><div class="label">手機號碼</div><div class="value">{{ row.phone }}</div></div>
+    <div class="meta-item"><div class="label">姓名</div><div class="value">{{ row.data.get('p0_name', '-') }}</div></div>
+    <div class="meta-item"><div class="label">部門</div><div class="value">{{ row.data.get('p0_dept', '-') }}</div></div>
+    <div class="meta-item"><div class="label">職稱</div><div class="value">{{ row.data.get('p0_title', '-') }}</div></div>
+    <div class="meta-item">
+      <div class="label">狀態</div>
+      <div class="value">
+        <span class="badge {% if row.completed %}badge-done{% else %}badge-wip{% endif %}">
+          {% if row.completed %}已完成{% else %}填寫中{% endif %}
+        </span>
+      </div>
+    </div>
+    <div class="meta-item"><div class="label">最後更新</div><div class="value">{{ row.updated_at.strftime('%Y-%m-%d %H:%M') if row.updated_at else '-' }}</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">完整資料（JSON，可貼給 AI 分析）</div>
+    <div class="json-block" id="jsonBlock">{{ data_json }}</div>
+    <button class="btn-copy" onclick="copyJson()">複製 JSON</button>
+  </div>
+</div>
+<script>
+function copyJson() {
+  const text = document.getElementById('jsonBlock').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    const orig = btn.textContent;
+    btn.textContent = '已複製！';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+</script>
+</body>
+</html>

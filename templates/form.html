@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>員工日常工作流程分析表</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif; background: #f4f6fb; color: #2c3e50; font-size: 17px; }
+.layout { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 220px; flex-shrink: 0; background: #1e2d40; color: #c8d6e5;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 24px 0;
+}
+.sidebar-title { font-size: 1rem; color: #a8bfd0; font-weight: bold; padding: 0 20px 14px; border-bottom: 1px solid #2c3e50; margin-bottom: 8px; }
+.sidebar-phone { font-size: 0.78rem; color: #7f8fa4; padding: 6px 20px 0; }
+.btn-sidebar-submit {
+  display: block; margin: 12px 16px 4px; padding: 11px 0;
+  background: #27ae60; color: #fff; font-size: 1rem; font-weight: bold;
+  border: none; border-radius: 8px; cursor: pointer; font-family: inherit;
+  text-align: center; transition: background 0.15s; width: calc(100% - 32px);
+}
+.btn-sidebar-submit:hover { background: #1e8449; }
+.nav-check { margin-left: auto; color: #27ae60; font-size: 0.9rem; font-weight: bold; }
+.nav-item {
+  display: flex; align-items: center; padding: 8px 20px; font-size: 0.9rem; cursor: pointer;
+  border-left: 3px solid transparent; transition: all 0.15s; color: #c8d6e5; text-decoration: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.nav-item.active { border-left-color: #4a90e2; background: rgba(74,144,226,0.12); color: #fff; font-weight: bold; }
+.main { flex: 1; padding: 32px 40px 80px; max-width: 820px; }
+@media (max-width: 768px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; padding: 12px 0; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+  .sidebar-title, .sidebar-phone { display: none; }
+  .nav-item { padding: 6px 12px; border-left: none; border-bottom: 2px solid transparent; font-size: 0.78rem; }
+  .nav-item.active { border-bottom-color: #4a90e2; border-left: none; }
+  .main { padding: 20px 16px 60px; }
+}
+.page-header { margin-bottom: 32px; }
+.page-header h1 { font-size: 1.6rem; color: #1e2d40; margin-bottom: 6px; }
+.page-header p { color: #7f8fa4; font-size: 0.9rem; }
+.part { display: none; }
+.part.active { display: block; }
+.part-header {
+  display: flex; align-items: center; gap: 12px;
+  background: #1e2d40; color: #fff; padding: 14px 20px;
+  border-radius: 10px 10px 0 0;
+}
+.part-header h2 { font-size: 1.05rem; font-weight: bold; }
+.part-header p { font-size: 0.8rem; color: #a8bfd0; margin-top: 2px; }
+.part-body { background: #fff; border-radius: 0 0 10px 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px; overflow: hidden; }
+.item-card { border: 1px solid #e8edf3; border-radius: 8px; margin: 20px; overflow: hidden; }
+.item-card-header { background: #f0f4fa; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e8edf3; }
+.item-card-header .item-title { font-weight: bold; font-size: 0.9rem; color: #2c3e50; }
+.item-card-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 0.92rem; font-weight: bold; color: #444; }
+.field .hint { font-size: 0.84rem; color: #999; }
+.field input[type="text"], .field textarea, .field select {
+  width: 100%; padding: 9px 12px; border: 1px solid #dde3ec; border-radius: 6px;
+  font-size: 0.95rem; font-family: inherit; color: #2c3e50; transition: border-color 0.15s; background: #fafbfc;
+}
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: #4a90e2; background: #fff; }
+.field textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+.io-block { background: #f8fafc; border: 1px solid #e4ecf5; border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.io-block .io-label { font-size: 0.78rem; font-weight: bold; color: #4a90e2; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: -4px; }
+.step-list { display: flex; flex-direction: column; gap: 6px; }
+.step-row { display: flex; align-items: center; gap: 8px; }
+.step-num { font-size: 0.88rem; color: #4a90e2; font-weight: bold; min-width: 22px; flex-shrink: 0; }
+.step-row input[type="text"] { flex: 1; padding: 7px 10px; border: 1px solid #dde3ec; border-radius: 5px; font-size: 0.92rem; font-family: inherit; color: #2c3e50; background: #fff; }
+.step-row input[type="text"]:focus { outline: none; border-color: #4a90e2; }
+.btn-del-step { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 2px 5px; line-height: 1; flex-shrink: 0; }
+.btn-del-step:hover { color: #e74c3c; }
+.btn-add-step { align-self: flex-start; background: none; border: 1px dashed #b8cfe8; border-radius: 5px; color: #4a90e2; font-size: 0.82rem; padding: 4px 12px; cursor: pointer; font-family: inherit; margin-top: 2px; transition: all 0.15s; }
+.btn-add-step:hover { background: #eef4fd; border-color: #4a90e2; }
+.radio-group, .check-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.radio-opt, .check-opt {
+  display: flex; align-items: center; gap: 6px;
+  background: #f4f6fb; border: 1px solid #dde3ec; border-radius: 20px;
+  padding: 5px 14px; cursor: pointer; font-size: 0.92rem; transition: all 0.15s;
+}
+.radio-opt:hover, .check-opt:hover { border-color: #4a90e2; background: #eef4fd; }
+.radio-opt input, .check-opt input { accent-color: #4a90e2; }
+.field-divider { border: none; border-top: 1px dashed #e4ecf5; }
+.btn-add-item {
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+  width: calc(100% - 40px); margin: 0 20px 20px;
+  padding: 11px; border: 2px dashed #b8cfe8; border-radius: 8px;
+  background: #f7faff; color: #4a90e2; font-size: 0.88rem; font-weight: bold;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-add-item:hover { background: #eef4fd; border-color: #4a90e2; }
+.btn-del-item { background: none; border: none; cursor: pointer; color: #ccc; font-size: 1rem; padding: 2px 6px; border-radius: 4px; transition: color 0.15s; }
+.btn-del-item:hover { color: #e74c3c; }
+.static-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.nav-btns { display: flex; gap: 12px; justify-content: space-between; padding: 20px 0 0; }
+.btn-prev, .btn-next, .btn-submit {
+  padding: 11px 28px; border: none; border-radius: 7px;
+  font-size: 0.92rem; font-family: inherit; cursor: pointer; font-weight: bold; transition: all 0.15s;
+}
+.btn-prev { background: #f0f2f5; color: #666; }
+.btn-prev:hover { background: #e4e7ec; }
+.btn-next { background: #4a90e2; color: #fff; }
+.btn-next:hover { background: #357abd; }
+.btn-submit { background: #27ae60; color: #fff; }
+.btn-submit:hover { background: #1e8449; }
+.progress-bar { height: 4px; background: #e4ecf5; border-radius: 2px; margin-bottom: 28px; overflow: hidden; }
+.progress-fill { height: 100%; background: #4a90e2; border-radius: 2px; transition: width 0.3s; }
+.save-status { font-size: 0.78rem; color: #999; margin-top: 6px; }
+.save-status.saved { color: #27ae60; }
+.save-status.error { color: #e74c3c; }
+.export-section { display: none; }
+@media print {
+  .sidebar, .nav-btns, .btn-add-item, .btn-del-item, .progress-bar { display: none !important; }
+  .part { display: block !important; }
+  .main { padding: 0; max-width: 100%; }
+  .item-card { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="sidebar-title">分析表導覽</div>
+  <div class="sidebar-phone">{{ phone }}</div>
+  <button class="btn-sidebar-submit" onclick="submitForm()">完成並儲存</button>
+  <a class="nav-item active" onclick="goTo(0)">基本資料<span class="nav-check" id="nav-check-0"></span></a>
+  <a class="nav-item" onclick="goTo(1)">每日工作<span class="nav-check" id="nav-check-1"></span></a>
+  <a class="nav-item" onclick="goTo(2)">每週工作<span class="nav-check" id="nav-check-2"></span></a>
+  <a class="nav-item" onclick="goTo(3)">月／季工作<span class="nav-check" id="nav-check-3"></span></a>
+  <a class="nav-item" onclick="goTo(4)">任務型工作<span class="nav-check" id="nav-check-4"></span></a>
+  <a class="nav-item" onclick="goTo(5)">突發工作<span class="nav-check" id="nav-check-5"></span></a>
+  <a class="nav-item" onclick="goTo(6)">痛點與自動化<span class="nav-check" id="nav-check-6"></span></a>
+</nav>
+
+<div class="main">
+  <div class="page-header">
+    <h1>員工日常工作流程分析表</h1>
+    <p>請依序填寫各部分，每項工作獨立填寫，系統會自動儲存。</p>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="save-status" id="saveStatus">載入中...</div>
+
+  <!-- Part 0: 基本資料 -->
+  <div class="part active" id="part-0">
+    <div class="part-header"><div><h2>Part 0 · 基本資料</h2></div></div>
+    <div class="part-body">
+      <div class="static-body">
+        <div class="field"><label>1. 姓名</label><input type="text" name="p0_name" placeholder="請輸入姓名"></div>
+        <div class="field"><label>2. 部門</label><input type="text" name="p0_dept" placeholder="例：業務部、財務部"></div>
+        <div class="field"><label>3. 職稱</label><input type="text" name="p0_title" placeholder="例：業務專員、會計"></div>
+      </div>
+    </div>
+    <div class="nav-btns"><div></div><button class="btn-next" onclick="goTo(1)">下一部分 →</button></div>
+  </div>
+
+  <!-- Part 1: 每日工作 -->
+  <div class="part" id="part-1">
+    <div class="part-header"><div><h2>Part 1 · 每日固定工作</h2><p>每件每天都會做的事請分開填寫一組</p></div></div>
+    <div class="part-body" id="body-1"></div>
+    <button class="btn-add-item" onclick="addItem(1)">+ 新增一件每日工作</button>
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goTo(0)">← 上一部分</button>
+      <button class="btn-next" onclick="goTo(2)">下一部分 →</button>
+    </div>
+  </div>
+
+  <!-- Part 2: 每週工作 -->
+  <div class="part" id="part-2">
+    <div class="part-header"><div><h2>Part 2 · 每週固定工作</h2><p>每件每週都會做的事請分開填寫一組</p></div></div>
+    <div class="part-body" id="body-2"></div>
+    <button class="btn-add-item" onclick="addItem(2)">+ 新增一件每週工作</button>
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goTo(1)">← 上一部分</button>
+      <button class="btn-next" onclick="goTo(3)">下一部分 →</button>
+    </div>
+  </div>
+
+  <!-- Part 3: 月/季工作 -->
+  <div class="part" id="part-3">
+    <div class="part-header"><div><h2>Part 3 · 每月／週期性工作</h2><p>每月或每季才做一次的事請分開填寫</p></div></div>
+    <div class="part-body" id="body-3"></div>
+    <button class="btn-add-item" onclick="addItem(3)">+ 新增一件月／季工作</button>
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goTo(2)">← 上一部分</button>
+      <button class="btn-next" onclick="goTo(4)">下一部分 →</button>
+    </div>
+  </div>
+
+  <!-- Part 4: 任務型工作 -->
+  <div class="part" id="part-4">
+    <div class="part-header"><div><h2>Part 4 · 任務型工作</h2><p>有發生才做的事（如客訴、報價、招募…）請分開填寫</p></div></div>
+    <div class="part-body" id="body-4"></div>
+    <button class="btn-add-item" onclick="addItem(4)">+ 新增一件任務型工作</button>
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goTo(3)">← 上一部分</button>
+      <button class="btn-next" onclick="goTo(5)">下一部分 →</button>
+    </div>
+  </div>
+
+  <!-- Part 5: 突發工作 -->
+  <div class="part" id="part-5">
+    <div class="part-header"><div><h2>Part 5 · 臨時／突發工作</h2><p>常見突發狀況請分開填寫</p></div></div>
+    <div class="part-body" id="body-5"></div>
+    <button class="btn-add-item" onclick="addItem(5)">+ 新增一件突發工作</button>
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goTo(4)">← 上一部分</button>
+      <button class="btn-next" onclick="goTo(6)">下一部分 →</button>
+    </div>
+  </div>
+
+  <!-- Part 6: 痛點盤點與自動化想像 -->
+  <div class="part" id="part-6">
+    <div class="part-header"><div><h2>Part 6 · 痛點盤點與自動化想像</h2></div></div>
+    <div class="part-body">
+      <div class="static-body">
+        <div class="field"><label>6-1. 什麼事情最常打斷你？</label><textarea name="p8_interrupt" placeholder="例：緊急電話、主管臨時交辦、同事問問題..."></textarea></div>
+        <div class="field"><label>6-2. 哪些工作出錯率最高？通常錯在哪？</label><textarea name="p8_error" placeholder="例：對帳時金額常對不上、出貨地址常打錯..."></textarea></div>
+        <div class="field"><label>6-3. 如果有一個 AI 助理，你最想丟給他做的三件事是？</label><textarea name="p9_delegate" placeholder="1. &#10;2. &#10;3. "></textarea></div>
+        <div class="field"><label>6-4. 電腦應該可以自動做，但現在還在人工的事</label><textarea name="p9_automate" placeholder="例：每天彙整報表、定時發通知、自動填表..."></textarea></div>
+        <div class="field">
+          <label>6-5. 你覺得你的工作有幾成是「重複性勞動」可以被自動化？</label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="p10_auto_pct" value="2成以下"> 2 成以下</label>
+            <label class="radio-opt"><input type="radio" name="p10_auto_pct" value="約3成"> 約 3 成</label>
+            <label class="radio-opt"><input type="radio" name="p10_auto_pct" value="約5成"> 約 5 成</label>
+            <label class="radio-opt"><input type="radio" name="p10_auto_pct" value="約7成"> 約 7 成</label>
+            <label class="radio-opt"><input type="radio" name="p10_auto_pct" value="8成以上"> 8 成以上</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goTo(5)">← 上一部分</button>
+      <button class="btn-submit" onclick="submitForm()">完成並儲存</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const TOTAL_PARTS = 7;
+let currentPart = 0;
+const counters = {1:0, 2:0, 3:0, 4:0, 5:0};
+
+function buildItem1(idx) {
+  return `
+  <div class="item-card" id="p1-item-${idx}">
+    <div class="item-card-header">
+      <span class="item-title">每日工作 #${idx}</span>
+      <button class="btn-del-item" onclick="delItem('p1-item-${idx}')">×</button>
+    </div>
+    <div class="item-card-body">
+      <div class="field"><label>1-1. 這件事叫什麼？</label><span class="hint">一句話命名，例：每日出貨單彙整</span><input type="text" name="p1_${idx}_name" placeholder="工作名稱"></div>
+      <div class="field"><label>1-2. 這件事的目的是什麼？為什麼要做？</label><textarea name="p1_${idx}_purpose" placeholder="說明目的與重要性"></textarea></div>
+      <div class="field">
+        <label>1-3. 怎麼做？（輸入 → 處理 → 輸出）</label>
+        <div class="io-block">
+          <div class="io-label">① 輸入：資料從哪裡來？</div>
+          <textarea name="p1_${idx}_input" placeholder="Email / LINE / 系統 / 口頭交辦..."></textarea>
+          <hr class="field-divider">
+          <div class="io-label">② 處理：你做了哪些處理？</div>
+          <div class="step-list" data-part="1" data-idx="${idx}">
+            <div class="step-row"><span class="step-num">1.</span><input type="text" name="p1_${idx}_step_1" placeholder="說明步驟..."><button class="btn-del-step" onclick="delStep(this)">×</button></div>
+            <button class="btn-add-step" onclick="addStep(this)">+ 新增步驟</button>
+          </div>
+          <hr class="field-divider">
+          <div class="io-label">③ 輸出：最後交給誰 / 放到哪裡？</div>
+          <textarea name="p1_${idx}_output" placeholder="例：上傳至共用雲端 / 傳給主管 / 更新系統..."></textarea>
+        </div>
+      </div>
+      <div class="field"><label>1-4. 用了哪些工具或系統？</label><input type="text" name="p1_${idx}_tools" placeholder="例：Excel、SAP、Google 試算表..."></div>
+      <div class="field"><label>1-5. 這個工作最常遇到的例外狀況是什麼？</label><input type="text" name="p1_${idx}_exception" placeholder="例：資料不完整 / 客戶臨時改 / 系統錯誤"></div>
+      <div class="field"><label>1-6. 需要動腦判斷嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_think" value="完全不用"> 完全不用</label>
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_think" value="部分需要"> 部分需要</label>
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_think" value="完全靠經驗"> 完全靠經驗</label>
+        </div>
+      </div>
+      <div class="field"><label>1-7. 有 SOP 文件嗎？還是憑記憶？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_sop" value="有SOP"> 有 SOP 文件</label>
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_sop" value="部分有"> 部分有文件</label>
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_sop" value="全憑記憶"> 全憑記憶</label>
+        </div>
+      </div>
+      <div class="field"><label>1-8. 如果沒做好，影響是？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_impact" value="高"> 高</label>
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_impact" value="中"> 中</label>
+          <label class="radio-opt"><input type="radio" name="p1_${idx}_impact" value="低"> 低</label>
+        </div>
+      </div>
+      <div class="field"><label>1-9. 你覺得這件事可以自動化嗎？</label>
+        <div class="check-group">
+          <label class="check-opt"><input type="checkbox" name="p1_${idx}_auto" value="已經可以（只是沒做）"> 已經可以（只是沒做）</label>
+          <label class="check-opt"><input type="checkbox" name="p1_${idx}_auto" value="部分可以（要人確認）"> 部分可以（要人確認）</label>
+          <label class="check-opt"><input type="checkbox" name="p1_${idx}_auto" value="很難（需要經驗判斷）"> 很難（需要經驗判斷）</label>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildItem2(idx) {
+  return `
+  <div class="item-card" id="p2-item-${idx}">
+    <div class="item-card-header">
+      <span class="item-title">每週工作 #${idx}</span>
+      <button class="btn-del-item" onclick="delItem('p2-item-${idx}')">×</button>
+    </div>
+    <div class="item-card-body">
+      <div class="field"><label>2-1. 這件事叫什麼？</label><input type="text" name="p2_${idx}_name" placeholder="例：週報製作、週會準備"></div>
+      <div class="field"><label>2-2. 每週幾做？一週做幾次？</label><input type="text" name="p2_${idx}_freq" placeholder="例：每週一、一週 1 次"></div>
+      <div class="field"><label>2-3. 這件事的目的是什麼？</label><textarea name="p2_${idx}_purpose" placeholder="說明目的"></textarea></div>
+      <div class="field">
+        <label>2-4. 怎麼做？（輸入 → 處理 → 輸出）</label>
+        <div class="io-block">
+          <div class="io-label">① 輸入：資料從哪裡來？</div>
+          <textarea name="p2_${idx}_input" placeholder="Email / LINE / 系統 / 口頭交辦..."></textarea>
+          <hr class="field-divider">
+          <div class="io-label">② 處理：你做了哪些處理？</div>
+          <div class="step-list" data-part="2" data-idx="${idx}">
+            <div class="step-row"><span class="step-num">1.</span><input type="text" name="p2_${idx}_step_1" placeholder="說明步驟..."><button class="btn-del-step" onclick="delStep(this)">×</button></div>
+            <button class="btn-add-step" onclick="addStep(this)">+ 新增步驟</button>
+          </div>
+          <hr class="field-divider">
+          <div class="io-label">③ 輸出：最後交給誰 / 放到哪裡？</div>
+          <textarea name="p2_${idx}_output" placeholder="例：上傳至共用雲端 / 傳給主管 / 更新系統..."></textarea>
+        </div>
+      </div>
+      <div class="field"><label>2-5. 用了哪些工具或系統？</label><input type="text" name="p2_${idx}_tools" placeholder="例：Excel、SAP、Google 試算表..."></div>
+      <div class="field"><label>2-6. 這個工作最常遇到的例外狀況是什麼？</label><input type="text" name="p2_${idx}_exception" placeholder="例：資料不完整 / 客戶臨時改 / 系統錯誤"></div>
+      <div class="field"><label>2-7. 需要動腦判斷嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_think" value="完全不用"> 完全不用</label>
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_think" value="部分需要"> 部分需要</label>
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_think" value="完全靠經驗"> 完全靠經驗</label>
+        </div>
+      </div>
+      <div class="field"><label>2-8. 有 SOP 文件嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_sop" value="有SOP"> 有 SOP</label>
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_sop" value="部分有"> 部分有</label>
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_sop" value="全憑記憶"> 全憑記憶</label>
+        </div>
+      </div>
+      <div class="field"><label>2-9. 如果沒做好，影響是？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_impact" value="高"> 高</label>
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_impact" value="中"> 中</label>
+          <label class="radio-opt"><input type="radio" name="p2_${idx}_impact" value="低"> 低</label>
+        </div>
+      </div>
+      <div class="field"><label>2-10. 你覺得這件事可以自動化嗎？</label>
+        <div class="check-group">
+          <label class="check-opt"><input type="checkbox" name="p2_${idx}_auto" value="已經可以（只是沒做）"> 已經可以（只是沒做）</label>
+          <label class="check-opt"><input type="checkbox" name="p2_${idx}_auto" value="部分可以（要人確認）"> 部分可以（要人確認）</label>
+          <label class="check-opt"><input type="checkbox" name="p2_${idx}_auto" value="很難（需要經驗判斷）"> 很難（需要經驗判斷）</label>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildItem3(idx) {
+  return `
+  <div class="item-card" id="p3-item-${idx}">
+    <div class="item-card-header">
+      <span class="item-title">月／季工作 #${idx}</span>
+      <button class="btn-del-item" onclick="delItem('p3-item-${idx}')">×</button>
+    </div>
+    <div class="item-card-body">
+      <div class="field"><label>3-1. 這件事叫什麼？</label><input type="text" name="p3_${idx}_name" placeholder="例：月結報表、季度庫存盤點"></div>
+      <div class="field"><label>3-2. 多久做一次？</label><input type="text" name="p3_${idx}_freq" placeholder="例：每月 5 號、每季末、每半年"></div>
+      <div class="field"><label>3-3. 這件事的目的是什麼？</label><textarea name="p3_${idx}_purpose" placeholder="說明目的"></textarea></div>
+      <div class="field">
+        <label>3-4. 怎麼做？（輸入 → 處理 → 輸出）</label>
+        <div class="io-block">
+          <div class="io-label">① 輸入：資料從哪裡來？</div>
+          <textarea name="p3_${idx}_input" placeholder="Email / LINE / 系統 / 口頭交辦..."></textarea>
+          <hr class="field-divider">
+          <div class="io-label">② 處理：你做了哪些處理？</div>
+          <div class="step-list" data-part="3" data-idx="${idx}">
+            <div class="step-row"><span class="step-num">1.</span><input type="text" name="p3_${idx}_step_1" placeholder="說明步驟..."><button class="btn-del-step" onclick="delStep(this)">×</button></div>
+            <button class="btn-add-step" onclick="addStep(this)">+ 新增步驟</button>
+          </div>
+          <hr class="field-divider">
+          <div class="io-label">③ 輸出：最後交給誰 / 放到哪裡？</div>
+          <textarea name="p3_${idx}_output" placeholder="例：上傳至共用雲端 / 傳給主管 / 更新系統..."></textarea>
+        </div>
+      </div>
+      <div class="field"><label>3-5. 用了哪些工具或系統？</label><input type="text" name="p3_${idx}_tools" placeholder="例：Excel、SAP、Google 試算表..."></div>
+      <div class="field"><label>3-6. 這個工作最常遇到的例外狀況是什麼？</label><input type="text" name="p3_${idx}_exception" placeholder="例：資料不完整 / 客戶臨時改 / 系統錯誤"></div>
+      <div class="field"><label>3-7. 需要動腦判斷嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_think" value="完全不用"> 完全不用</label>
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_think" value="部分需要"> 部分需要</label>
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_think" value="完全靠經驗"> 完全靠經驗</label>
+        </div>
+      </div>
+      <div class="field"><label>3-8. 有 SOP 文件嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_sop" value="有SOP"> 有 SOP</label>
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_sop" value="部分有"> 部分有</label>
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_sop" value="全憑記憶"> 全憑記憶</label>
+        </div>
+      </div>
+      <div class="field"><label>3-9. 如果沒做好，影響是？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_impact" value="高"> 高</label>
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_impact" value="中"> 中</label>
+          <label class="radio-opt"><input type="radio" name="p3_${idx}_impact" value="低"> 低</label>
+        </div>
+      </div>
+      <div class="field"><label>3-10. 你覺得這件事可以自動化嗎？</label>
+        <div class="check-group">
+          <label class="check-opt"><input type="checkbox" name="p3_${idx}_auto" value="已經可以（只是沒做）"> 已經可以（只是沒做）</label>
+          <label class="check-opt"><input type="checkbox" name="p3_${idx}_auto" value="部分可以（要人確認）"> 部分可以（要人確認）</label>
+          <label class="check-opt"><input type="checkbox" name="p3_${idx}_auto" value="很難（需要經驗判斷）"> 很難（需要經驗判斷）</label>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildItem4(idx) {
+  return `
+  <div class="item-card" id="p4-item-${idx}">
+    <div class="item-card-header">
+      <span class="item-title">任務型工作 #${idx}</span>
+      <button class="btn-del-item" onclick="delItem('p4-item-${idx}')">×</button>
+    </div>
+    <div class="item-card-body">
+      <div class="field"><label>4-1. 這件事叫什麼？</label><input type="text" name="p4_${idx}_name" placeholder="例：客戶報價、招募面試安排"></div>
+      <div class="field"><label>4-2. 通常什麼情況會觸發？</label><textarea name="p4_${idx}_trigger" placeholder="誰來找你 / 什麼事件發生會讓你需要處理這件事"></textarea></div>
+      <div class="field"><label>4-3. 平均一週發生幾次？</label><input type="text" name="p4_${idx}_freq" placeholder="例：約 3 次"></div>
+      <div class="field"><label>4-4. 這件事的目的是什麼？</label><textarea name="p4_${idx}_purpose" placeholder="說明目的與重要性"></textarea></div>
+      <div class="field">
+        <label>4-5. 怎麼做？（輸入 → 處理 → 輸出）</label>
+        <div class="io-block">
+          <div class="io-label">① 輸入：資料從哪裡來？</div>
+          <textarea name="p4_${idx}_input" placeholder="Email / LINE / 系統 / 口頭交辦..."></textarea>
+          <hr class="field-divider">
+          <div class="io-label">② 處理：你做了哪些處理？</div>
+          <div class="step-list" data-part="4" data-idx="${idx}">
+            <div class="step-row"><span class="step-num">1.</span><input type="text" name="p4_${idx}_step_1" placeholder="說明步驟..."><button class="btn-del-step" onclick="delStep(this)">×</button></div>
+            <button class="btn-add-step" onclick="addStep(this)">+ 新增步驟</button>
+          </div>
+          <hr class="field-divider">
+          <div class="io-label">③ 輸出：最後交給誰 / 放到哪裡？</div>
+          <textarea name="p4_${idx}_output" placeholder="例：上傳至共用雲端 / 傳給主管 / 更新系統..."></textarea>
+        </div>
+      </div>
+      <div class="field"><label>4-6. 用了哪些工具或系統？</label><input type="text" name="p4_${idx}_tools" placeholder="例：Excel、SAP、Google 試算表..."></div>
+      <div class="field"><label>4-7. 這個工作最常遇到的例外狀況是什麼？</label><input type="text" name="p4_${idx}_exception" placeholder="例：資料不完整 / 客戶臨時改 / 系統錯誤"></div>
+      <div class="field"><label>4-8. 需要動腦判斷嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_think" value="完全不用"> 完全不用</label>
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_think" value="部分需要"> 部分需要</label>
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_think" value="完全靠經驗"> 完全靠經驗</label>
+        </div>
+      </div>
+      <div class="field"><label>4-9. 需要等別人回覆嗎？等誰？通常等多久？</label><textarea name="p4_${idx}_wait" placeholder="例：等主管核准，通常等 1-2 天"></textarea></div>
+      <div class="field"><label>4-10. 有 SOP 文件嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_sop" value="有SOP"> 有 SOP</label>
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_sop" value="部分有"> 部分有</label>
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_sop" value="全憑記憶"> 全憑記憶</label>
+        </div>
+      </div>
+      <div class="field"><label>4-11. 如果沒做好，影響是？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_impact" value="高"> 高</label>
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_impact" value="中"> 中</label>
+          <label class="radio-opt"><input type="radio" name="p4_${idx}_impact" value="低"> 低</label>
+        </div>
+      </div>
+      <div class="field"><label>4-12. 你覺得這件事可以自動化嗎？</label>
+        <div class="check-group">
+          <label class="check-opt"><input type="checkbox" name="p4_${idx}_auto" value="已經可以（只是沒做）"> 已經可以（只是沒做）</label>
+          <label class="check-opt"><input type="checkbox" name="p4_${idx}_auto" value="部分可以（要人確認）"> 部分可以（要人確認）</label>
+          <label class="check-opt"><input type="checkbox" name="p4_${idx}_auto" value="很難（需要經驗判斷）"> 很難（需要經驗判斷）</label>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildItem5(idx) {
+  return `
+  <div class="item-card" id="p5-item-${idx}">
+    <div class="item-card-header">
+      <span class="item-title">突發工作 #${idx}</span>
+      <button class="btn-del-item" onclick="delItem('p5-item-${idx}')">×</button>
+    </div>
+    <div class="item-card-body">
+      <div class="field"><label>5-1. 這件事叫什麼？</label><input type="text" name="p5_${idx}_name" placeholder="例：客戶臨時改單、系統故障緊急處理"></div>
+      <div class="field"><label>5-2. 多久會發生一次？</label><input type="text" name="p5_${idx}_freq" placeholder="例：每週 2-3 次"></div>
+      <div class="field"><label>5-3. 通常會打斷你正在做什麼事？</label><input type="text" name="p5_${idx}_interrupt" placeholder="例：打斷我做出貨單或接電話時"></div>
+      <div class="field">
+        <label>5-4. 怎麼處理？（輸入 → 處理 → 輸出）</label>
+        <div class="io-block">
+          <div class="io-label">① 輸入：資料從哪裡來？</div>
+          <textarea name="p5_${idx}_input" placeholder="Email / LINE / 系統 / 口頭交辦..."></textarea>
+          <hr class="field-divider">
+          <div class="io-label">② 處理：你做了哪些處理？</div>
+          <div class="step-list" data-part="5" data-idx="${idx}">
+            <div class="step-row"><span class="step-num">1.</span><input type="text" name="p5_${idx}_step_1" placeholder="說明步驟..."><button class="btn-del-step" onclick="delStep(this)">×</button></div>
+            <button class="btn-add-step" onclick="addStep(this)">+ 新增步驟</button>
+          </div>
+          <hr class="field-divider">
+          <div class="io-label">③ 輸出：最後交給誰 / 放到哪裡？</div>
+          <textarea name="p5_${idx}_output" placeholder="例：上傳至共用雲端 / 傳給主管 / 更新系統..."></textarea>
+        </div>
+      </div>
+      <div class="field"><label>5-5. 用了哪些工具或系統？</label><input type="text" name="p5_${idx}_tools" placeholder="例：Excel、SAP、Google 試算表..."></div>
+      <div class="field"><label>5-6. 這個工作最常遇到的例外狀況是什麼？</label><input type="text" name="p5_${idx}_exception" placeholder="例：資料不完整 / 客戶臨時改 / 系統錯誤"></div>
+      <div class="field"><label>5-7. 需要動腦判斷嗎？</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="p5_${idx}_think" value="完全不用"> 完全不用</label>
+          <label class="radio-opt"><input type="radio" name="p5_${idx}_think" value="部分需要"> 部分需要</label>
+          <label class="radio-opt"><input type="radio" name="p5_${idx}_think" value="完全靠經驗"> 完全靠經驗</label>
+        </div>
+      </div>
+      <div class="field"><label>5-8. 這件事發生的根本原因是什麼？（可複選）</label>
+        <div class="check-group">
+          <label class="check-opt"><input type="checkbox" name="p5_${idx}_root" value="上游部門資訊不完整"> 上游部門資訊不完整</label>
+          <label class="check-opt"><input type="checkbox" name="p5_${idx}_root" value="系統不夠即時"> 系統不夠即時</label>
+          <label class="check-opt"><input type="checkbox" name="p5_${idx}_root" value="客戶需求多變"> 客戶需求多變</label>
+          <label class="check-opt"><input type="checkbox" name="p5_${idx}_root" value="沒有標準流程"> 沒有標準流程</label>
+        </div>
+        <input type="text" name="p5_${idx}_root_other" placeholder="其他原因：">
+      </div>
+      <div class="field"><label>5-9. 你覺得這件事可以自動化嗎？</label>
+        <div class="check-group">
+          <label class="check-opt"><input type="checkbox" name="p5_${idx}_auto" value="已經可以（只是沒做）"> 已經可以（只是沒做）</label>
+          <label class="check-opt"><input type="checkbox" name="p5_${idx}_auto" value="部分可以（要人確認）"> 部分可以（要人確認）</label>
+          <label class="check-opt"><input type="checkbox" name="p5_${idx}_auto" value="很難（需要經驗判斷）"> 很難（需要經驗判斷）</label>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+const builders = { 1: buildItem1, 2: buildItem2, 3: buildItem3, 4: buildItem4, 5: buildItem5 };
+
+function addItem(part) {
+  counters[part]++;
+  const container = document.getElementById(`body-${part}`);
+  const div = document.createElement('div');
+  div.innerHTML = builders[part](counters[part]);
+  container.appendChild(div.firstElementChild);
+  autoSave();
+}
+
+function delItem(id) {
+  const el = document.getElementById(id);
+  if (el) { el.remove(); autoSave(); }
+}
+
+function goTo(n) {
+  document.querySelectorAll('.part').forEach(p => p.classList.remove('active'));
+  document.getElementById(`part-${n}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.toggle('active', i === n));
+  currentPart = n;
+  document.getElementById('progressFill').style.width = `${Math.round((n / (TOTAL_PARTS - 1)) * 100)}%`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  autoSave();
+}
+
+function addStep(btn) {
+  const list = btn.closest('.step-list');
+  const part = list.dataset.part;
+  const idx = list.dataset.idx;
+  const n = list.querySelectorAll('.step-row').length + 1;
+  const row = document.createElement('div');
+  row.className = 'step-row';
+  row.innerHTML = `<span class="step-num">${n}.</span><input type="text" name="p${part}_${idx}_step_${n}" placeholder="說明步驟..."><button class="btn-del-step" onclick="delStep(this)">×</button>`;
+  btn.insertAdjacentElement('beforebegin', row);
+  autoSave();
+}
+
+function delStep(btn) {
+  const row = btn.closest('.step-row');
+  const list = row.closest('.step-list');
+  const part = list.dataset.part;
+  const idx = list.dataset.idx;
+  row.remove();
+  list.querySelectorAll('.step-row').forEach((r, i) => {
+    r.querySelector('.step-num').textContent = (i + 1) + '.';
+    r.querySelector('input').name = `p${part}_${idx}_step_${i + 1}`;
+  });
+  autoSave();
+}
+
+function restoreSteps(data) {
+  document.querySelectorAll('.step-list').forEach(list => {
+    const part = list.dataset.part;
+    const idx = list.dataset.idx;
+    const prefix = `p${part}_${idx}_step_`;
+    const maxStep = Object.keys(data).filter(k => k.startsWith(prefix))
+      .reduce((m, k) => Math.max(m, parseInt(k.replace(prefix, '')) || 0), 1);
+    const addBtn = list.querySelector('.btn-add-step');
+    const current = list.querySelectorAll('.step-row').length;
+    for (let i = current + 1; i <= maxStep; i++) addStep(addBtn);
+  });
+}
+
+function collectData() {
+  const data = {};
+  document.querySelectorAll('input[type="text"], textarea, select').forEach(el => {
+    if (el.name) data[el.name] = el.value;
+  });
+  document.querySelectorAll('input[type="radio"]:checked').forEach(el => {
+    if (el.name) data[el.name] = el.value;
+  });
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => {
+    if (!el.name) return;
+    if (!data[el.name]) data[el.name] = [];
+    if (el.checked) data[el.name].push(el.value);
+  });
+  return data;
+}
+
+function restoreData(data) {
+  Object.entries(data).forEach(([name, val]) => {
+    if (Array.isArray(val)) {
+      val.forEach(v => {
+        const el = document.querySelector(`input[name="${name}"][value="${v}"]`);
+        if (el) el.checked = true;
+      });
+    } else {
+      const el = document.querySelector(`[name="${name}"]`);
+      if (!el) return;
+      if (el.type === 'radio') {
+        const r = document.querySelector(`input[name="${name}"][value="${val}"]`);
+        if (r) r.checked = true;
+      } else {
+        el.value = val;
+      }
+    }
+  });
+}
+
+function updateNavChecks() {
+  for (let i = 0; i <= 6; i++) {
+    const part = document.getElementById(`part-${i}`);
+    const check = document.getElementById(`nav-check-${i}`);
+    if (!part || !check) continue;
+    const filled = Array.from(part.querySelectorAll('input[type="text"], textarea')).some(el => el.value.trim()) ||
+                   part.querySelector('input[type="radio"]:checked') ||
+                   part.querySelector('input[type="checkbox"]:checked');
+    check.textContent = filled ? '✓' : '';
+  }
+}
+
+// ── Server save ──────────────────────────────────────────────────
+let saveTimer;
+function autoSave() {
+  clearTimeout(saveTimer);
+  updateNavChecks();
+  saveTimer = setTimeout(() => {
+    const s = document.getElementById('saveStatus');
+    s.textContent = '儲存中...';
+    s.className = 'save-status';
+    fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(collectData())
+    }).then(r => r.json()).then(d => {
+      if (d.ok) {
+        s.textContent = '已自動儲存 ✓';
+        s.className = 'save-status saved';
+        setTimeout(() => { s.textContent = ''; s.className = 'save-status'; }, 3000);
+      }
+    }).catch(() => {
+      s.textContent = '儲存失敗';
+      s.className = 'save-status error';
+    });
+  }, 1000);
+}
+
+document.addEventListener('input', autoSave);
+document.addEventListener('change', autoSave);
+
+function submitForm() {
+  const s = document.getElementById('saveStatus');
+  s.textContent = '儲存中...';
+  fetch('/api/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(collectData())
+  }).then(r => r.json()).then(d => {
+    if (d.ok) {
+      s.textContent = '已完成儲存 ✓';
+      s.className = 'save-status saved';
+      alert('感謝您完成填寫！資料已儲存。');
+    }
+  }).catch(() => {
+    s.textContent = '儲存失敗，請重試';
+    s.className = 'save-status error';
+  });
+}
+
+// ── Init: restore items then data from server ────────────────────
+function restoreItems(data) {
+  [1, 2, 3, 4, 5].forEach(part => {
+    const keys = Object.keys(data).filter(k => k.startsWith(`p${part}_`) && k.endsWith('_name'));
+    const indices = keys.map(k => parseInt(k.split('_')[1])).filter(n => !isNaN(n));
+    const max = indices.length ? Math.max(...indices) : 0;
+    for (let i = 1; i <= max; i++) addItem(part);
+  });
+}
+
+fetch('/api/load').then(r => r.json()).then(d => {
+  const s = document.getElementById('saveStatus');
+  if (d.ok && d.data && Object.keys(d.data).length) {
+    restoreItems(d.data);
+    restoreSteps(d.data);
+    restoreData(d.data);
+    s.textContent = '已載入上次填寫';
+    s.className = 'save-status saved';
+    setTimeout(() => { s.textContent = ''; s.className = 'save-status'; }, 3000);
+  } else {
+    s.textContent = '';
+  }
+  updateNavChecks();
+}).catch(() => {
+  document.getElementById('saveStatus').textContent = '';
+});
+</script>
+</body>
+</html>

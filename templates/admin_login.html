@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理後台</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft JhengHei", Arial, sans-serif; background: #f4f6fb; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 40px 36px; width: 100%; max-width: 380px; }
+h1 { font-size: 1.2rem; color: #1e2d40; margin-bottom: 24px; }
+label { display: block; font-size: 0.9rem; font-weight: bold; color: #444; margin-bottom: 8px; }
+input[type="password"] { width: 100%; padding: 11px 14px; border: 1px solid #dde3ec; border-radius: 7px; font-size: 1rem; font-family: inherit; }
+input:focus { outline: none; border-color: #4a90e2; }
+button { width: 100%; margin-top: 16px; padding: 12px; background: #1e2d40; color: #fff; border: none; border-radius: 7px; font-size: 1rem; font-family: inherit; font-weight: bold; cursor: pointer; }
+button:hover { background: #2c3e50; }
+.error { color: #e74c3c; font-size: 0.88rem; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>管理後台登入</h1>
+  <form method="POST">
+    <label for="password">密碼</label>
+    <input type="password" id="password" name="password" autofocus>
+    <button type="submit">登入</button>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  </form>
+</div>
+</body>
+</html>

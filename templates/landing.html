@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>員工工作流程分析表</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif; background: #f4f6fb; color: #2c3e50; font-size: 17px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 40px 36px; width: 100%; max-width: 420px; }
+h1 { font-size: 1.3rem; color: #1e2d40; margin-bottom: 8px; }
+p { color: #7f8fa4; font-size: 0.9rem; margin-bottom: 28px; line-height: 1.6; }
+label { display: block; font-weight: bold; font-size: 0.92rem; margin-bottom: 8px; color: #444; }
+input[type="text"] { width: 100%; padding: 12px 14px; border: 1px solid #dde3ec; border-radius: 7px; font-size: 1rem; font-family: inherit; color: #2c3e50; background: #fafbfc; transition: border-color 0.15s; }
+input[type="text"]:focus { outline: none; border-color: #4a90e2; background: #fff; }
+button { width: 100%; margin-top: 16px; padding: 13px; background: #4a90e2; color: #fff; border: none; border-radius: 7px; font-size: 1rem; font-family: inherit; font-weight: bold; cursor: pointer; transition: background 0.15s; }
+button:hover { background: #357abd; }
+.error { color: #e74c3c; font-size: 0.88rem; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>員工日常工作流程分析表</h1>
+  <p>請輸入您的手機號碼開始填寫。下次用同一號碼進入可繼續編輯。</p>
+  <form method="POST" action="/enter">
+    <label for="phone">手機號碼</label>
+    <input type="text" id="phone" name="phone" placeholder="例：0912345678" autocomplete="tel" autofocus>
+    <button type="submit">開始填寫</button>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  </form>
+</div>
+</body>
+</html>
