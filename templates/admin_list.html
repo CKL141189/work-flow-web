@@ -52,11 +52,11 @@ a.view-link:hover { text-decoration: underline; }
       <div class="label">總填寫人數</div>
     </div>
     <div class="stat-card">
-      <div class="num">{{ rows|selectattr('completed')|list|length }}</div>
+      <div class="num">{{ rows|selectattr('completed', 'equalto', true)|list|length }}</div>
       <div class="label">已完成</div>
     </div>
     <div class="stat-card">
-      <div class="num">{{ rows|rejectattr('completed')|list|length }}</div>
+      <div class="num">{{ rows|selectattr('completed', 'equalto', false)|list|length }}</div>
       <div class="label">填寫中</div>
     </div>
   </div>

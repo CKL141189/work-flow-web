@@ -58,6 +58,10 @@ def api_save():
         return jsonify({'ok': False, 'error': 'no session'})
     phone = session['phone']
     data = request.get_json()
+    try:
+        init_db()
+    except Exception:
+        pass
     conn = get_db()
     cur = conn.cursor()
     cur.execute('''
@@ -209,7 +213,10 @@ def admin_logout():
     session.pop('admin', None)
     return redirect(url_for('admin_login'))
 
-init_db()
+try:
+    init_db()
+except Exception as e:
+    print(f"init_db error: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True)
