@@ -60,19 +60,19 @@ def api_save():
     data = request.get_json()
     try:
         init_db()
-    except Exception:
-        pass
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute('''
-        INSERT INTO submissions (phone, data, updated_at)
-        VALUES (%s, %s, NOW())
-        ON CONFLICT (phone) DO UPDATE SET data = %s, updated_at = NOW()
-    ''', (phone, json.dumps(data), json.dumps(data)))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return jsonify({'ok': True})
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('''
+            INSERT INTO submissions (phone, data, updated_at)
+            VALUES (%s, %s, NOW())
+            ON CONFLICT (phone) DO UPDATE SET data = %s, updated_at = NOW()
+        ''', (phone, json.dumps(data), json.dumps(data)))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)})
 
 @app.route('/api/complete', methods=['POST'])
 def api_complete():
@@ -80,32 +80,40 @@ def api_complete():
         return jsonify({'ok': False})
     phone = session['phone']
     data = request.get_json()
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute('''
-        INSERT INTO submissions (phone, data, updated_at, completed)
-        VALUES (%s, %s, NOW(), TRUE)
-        ON CONFLICT (phone) DO UPDATE SET data = %s, updated_at = NOW(), completed = TRUE
-    ''', (phone, json.dumps(data), json.dumps(data)))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return jsonify({'ok': True})
+    try:
+        init_db()
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('''
+            INSERT INTO submissions (phone, data, updated_at, completed)
+            VALUES (%s, %s, NOW(), TRUE)
+            ON CONFLICT (phone) DO UPDATE SET data = %s, updated_at = NOW(), completed = TRUE
+        ''', (phone, json.dumps(data), json.dumps(data)))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)})
 
 @app.route('/api/load')
 def api_load():
     if 'phone' not in session:
         return jsonify({'ok': False})
     phone = session['phone']
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cur.execute('SELECT data FROM submissions WHERE phone = %s', (phone,))
-    row = cur.fetchone()
-    cur.close()
-    conn.close()
-    if row and row['data']:
-        return jsonify({'ok': True, 'data': row['data']})
-    return jsonify({'ok': True, 'data': {}})
+    try:
+        init_db()
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute('SELECT data FROM submissions WHERE phone = %s', (phone,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        if row and row['data']:
+            return jsonify({'ok': True, 'data': row['data']})
+        return jsonify({'ok': True, 'data': {}})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)})
 
 # ── Admin routes ─────────────────────────────────────────────────
 

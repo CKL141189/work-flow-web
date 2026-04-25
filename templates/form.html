@@ -677,9 +677,12 @@ function autoSave() {
         s.textContent = '已自動儲存 ✓';
         s.className = 'save-status saved';
         setTimeout(() => { s.textContent = ''; s.className = 'save-status'; }, 3000);
+      } else {
+        s.textContent = '儲存失敗：' + (d.error || '未知錯誤');
+        s.className = 'save-status error';
       }
     }).catch(() => {
-      s.textContent = '儲存失敗';
+      s.textContent = '儲存失敗：網路錯誤';
       s.className = 'save-status error';
     });
   }, 1000);
